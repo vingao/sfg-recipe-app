@@ -1,38 +1,27 @@
 package guru.springframework.controllers;
 
-import guru.springframework.domain.Category;
-import guru.springframework.repositories.CategoryRepository;
-import guru.springframework.repositories.UnitOfMeasureRepository;
+import guru.springframework.services.RecipeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Optional;
-
+@Slf4j
 @Controller
 public class IndexController {
-    private final CategoryRepository categoryRepository;
-    private final UnitOfMeasureRepository unitOfMeasureRepository;
 
-    public IndexController(CategoryRepository categoryRepository, UnitOfMeasureRepository unitOfMeasureRepository) {
-        this.categoryRepository = categoryRepository;
-        this.unitOfMeasureRepository = unitOfMeasureRepository;
+    private final RecipeService recipeService;
+
+    public IndexController(RecipeService recipeService) {
+        this.recipeService = recipeService;
     }
 
-    @RequestMapping("/")
-    public String index() {
+    @RequestMapping({"", "/", "/index"})
+    public String getIndexPage(Model model) {
+        log.debug("Getting Index page");
+
+        model.addAttribute("recipes", recipeService.getRecipes());
+
         return "index";
-    }
-
-    @RequestMapping("/category/{desc}")
-    @ResponseBody
-    public Category findCategoryByDesc(@PathVariable String desc) {
-        Optional<Category> category = categoryRepository.findByDescription(desc);
-        if (category.isPresent()) {
-            return category.get();
-        } else {
-            throw new RuntimeException("category not found");
-        }
     }
 }
